@@ -257,7 +257,7 @@ st.write(
     "B40, M40, or T20 based on income and expenditure."
 )
 
-st.markdown("<br><br>", unsafe_allow_html=True)
+st.markdown("<br>", unsafe_allow_html=True)
 
 # =====================================================
 # USER INPUT
