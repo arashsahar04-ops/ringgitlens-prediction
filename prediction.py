@@ -263,46 +263,41 @@ st.markdown("<br><br>", unsafe_allow_html=True)
 # USER INPUT
 # =====================================================
 
-col1, col2 = st.columns(2)
+area_type = st.radio(
+    "Choose prediction level:",
+    ["Malaysia", "State"],
+    horizontal=True
+)
 
-with col1:
+if area_type == "Malaysia":
 
-    area_type = st.radio(
-        "Choose prediction level:",
-        ["Malaysia", "State"]
+    selected_scope = "MALAYSIA"
+    selected_state = "MALAYSIA"
+
+else:
+
+    selected_scope = "STATE"
+
+    state_list = sorted(
+        df[df["state"] != "MALAYSIA"]["state"].unique()
     )
 
-    if area_type == "Malaysia":
-
-        selected_scope = "MALAYSIA"
-        selected_state = "MALAYSIA"
-
-    else:
-
-        selected_scope = "STATE"
-
-        state_list = sorted(
-            df[df["state"] != "MALAYSIA"]["state"].unique()
-        )
-
-        selected_state = st.selectbox(
-            "Choose your state:",
-            state_list
-        )
-
-with col2:
-
-    income = st.number_input(
-        "Monthly Household Income (RM)",
-        min_value=0.0,
-        step=100.0
+    selected_state = st.selectbox(
+        "Choose your state:",
+        state_list
     )
 
-    expenditure = st.number_input(
-        "Monthly Household Expenditure (RM)",
-        min_value=0.0,
-        step=100.0
-    )
+income = st.number_input(
+    "Please state your estimated monthly income (RM)",
+    min_value=0.0,
+    step=100.0
+)
+
+expenditure = st.number_input(
+    "Please state your estimated monthly household expenditure (RM)",
+    min_value=0.0,
+    step=100.0
+)
 
 st.markdown("<br>", unsafe_allow_html=True)
 
