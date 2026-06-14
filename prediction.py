@@ -194,7 +194,7 @@ header {
 # LOAD DATASET
 # =====================================================
 
-df = pd.read_csv("income_master_fyp_enriched.csv")
+df = pd.read_csv("income_group_master_fyp_enriched.csv")
 
 df["state"] = df["state"].astype(str).str.upper()
 df["income_class"] = df["income_class"].astype(str).str.upper()
