@@ -194,7 +194,27 @@ header {
 # LOAD DATASET
 # =====================================================
 
-df = pd.read_csv("income_group_master_updated.csv")
+df = pd.read_csv("income_master_fyp_enriched.csv")
+
+df["state"] = df["state"].astype(str).str.upper()
+df["income_class"] = df["income_class"].astype(str).str.upper()
+
+# =====================================================
+# CALCULATE STATE THRESHOLDS
+# =====================================================
+
+state_income_reference = (
+    df.groupby(["state", "income_class"])["income_mean"]
+      .mean()
+      .reset_index()
+)
+
+# National reference
+malaysia_reference = (
+    df.groupby("income_class")["income_mean"]
+      .mean()
+      .to_dict()
+)
 
 # =====================================================
 # CLEAN DATA
@@ -307,28 +327,54 @@ st.markdown("<br>", unsafe_allow_html=True)
 
 if st.button("Predict Income Group"):
 
-    scope_encoded = scope_encoder.transform([selected_scope])[0]
+    # ===============================================
+    # GET REFERENCE INCOME VALUES
+    # ===============================================
 
-    state_encoded = state_encoder.transform([selected_state])[0]
+    if selected_scope == "MALAYSIA":
 
-    user_input = pd.DataFrame([{
-        "scope_encoded": scope_encoded,
-        "state_encoded": state_encoded,
-        "income": income,
-        "expenditure": expenditure
-    }])
+        reference = malaysia_reference
 
-    prediction = model.predict(user_input)
+    else:
 
-    predicted_group = target_encoder.inverse_transform(prediction)[0]
+        state_data = state_income_reference[
+            state_income_reference["state"] == selected_state
+        ]
+
+        reference = {
+            row["income_class"]: row["income_mean"]
+            for _, row in state_data.iterrows()
+        }
+
+    # ===============================================
+    # FIND CLOSEST INCOME GROUP
+    # ===============================================
+
+    differences = {}
+
+    for group in ["B40", "M40", "T20"]:
+
+        if group in reference:
+
+            differences[group] = abs(
+                income - reference[group]
+            )
+
+    predicted_group = min(
+        differences,
+        key=differences.get
+    )
 
     balance = income - expenditure
 
-    # =================================================
+    # ===============================================
     # RESULT
-    # =================================================
+    # ===============================================
 
-    st.markdown('<div class="result-box">', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="result-box">',
+        unsafe_allow_html=True
+    )
 
     st.subheader("Prediction Result")
 
@@ -336,19 +382,30 @@ if st.button("Predict Income Group"):
         f"Predicted Income Group: {predicted_group}"
     )
 
-    st.write(f"Selected Area: {selected_state}")
+    st.write(
+        f"Selected Area: {selected_state}"
+    )
 
-    st.write(f"Income: RM {income:,.2f}")
+    st.write(
+        f"Monthly Income: RM {income:,.2f}"
+    )
 
-    st.write(f"Expenditure: RM {expenditure:,.2f}")
+    st.write(
+        f"Monthly Expenditure: RM {expenditure:,.2f}"
+    )
 
-    st.write(f"Remaining Balance: RM {balance:,.2f}")
+    st.write(
+        f"Remaining Balance: RM {balance:,.2f}"
+    )
 
-    st.markdown("</div>", unsafe_allow_html=True)
+    st.markdown(
+        "</div>",
+        unsafe_allow_html=True
+    )
 
-    # =================================================
-    # FINANCIAL SUGGESTIONS
-    # =================================================
+    # ===============================================
+    # FINANCIAL SUGGESTION
+    # ===============================================
 
     st.subheader("Financial Suggestion")
 
@@ -389,8 +446,7 @@ if st.button("Predict Income Group"):
         st.markdown("""
         <div class="advice-box">
         Your spending is close to your income.
-        Try to save at least 10% to 20% of your income
-        whenever possible.
+        Try to save at least 10% to 20% of your income.
         </div>
         """, unsafe_allow_html=True)
 
@@ -403,8 +459,7 @@ if st.button("Predict Income Group"):
         st.markdown("""
         <div class="advice-box">
         Your income is higher than your expenditure.
-        You may continue building savings or prepare
-        an emergency fund for future financial security.
+        Continue building savings and emergency funds.
         </div>
         """, unsafe_allow_html=True)
 
@@ -417,7 +472,6 @@ if st.button("Predict Income Group"):
         st.markdown("""
         <div class="advice-box">
         Your financial condition appears stable.
-        You may consider long-term savings or investment
-        planning for future growth.
+        Consider long-term savings and investment planning.
         </div>
         """, unsafe_allow_html=True)
