@@ -226,7 +226,7 @@ df["income_group"] = df["income_group"].astype(str).str.upper()
 
 # Rename columns
 df = df.rename(columns={
-    "mean": "income",
+    "income_mean": "income",
     "estimated_expenditure": "expenditure"
 })
 
