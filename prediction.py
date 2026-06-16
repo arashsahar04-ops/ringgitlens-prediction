@@ -204,14 +204,14 @@ df["income_class"] = df["income_class"].astype(str).str.upper()
 # =====================================================
 
 state_income_reference = (
-    df.groupby(["state", "income_class"])["mean"]
+    df.groupby(["state", "income_class"])["income_mean"]
       .mean()
       .reset_index()
 )
 
 # National reference
 malaysia_reference = (
-    df.groupby("income_class")["mean"]
+    df.groupby("income_class")["income_mean"]
       .mean()
       .to_dict()
 )
