@@ -635,7 +635,7 @@ if predict_clicked:
             margin=dict(l=10, r=10, t=10, b=10),
             plot_bgcolor="rgba(0,0,0,0)",
             paper_bgcolor="rgba(0,0,0,0)",
-            font=dict(family="Inter, sans-serif", color="#475A53", size=13),
+            font=dict(family="Inter, sans-serif", color="#0F1B17", size=13),
             legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
             yaxis=dict(title="RM / month", gridcolor="#E1E8DE", zeroline=False),
             xaxis=dict(title=None, gridcolor="rgba(0,0,0,0)"),
