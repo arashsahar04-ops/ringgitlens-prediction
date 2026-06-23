@@ -199,6 +199,7 @@ div[role="radiogroup"] label:hover {
 [data-testid="stNumberInput"] button {
     background-color: var(--canvas) !important;
     border: 1px solid var(--hairline) !important;
+    color: #0F1B17 !important;
 }
 
 /* =========================
