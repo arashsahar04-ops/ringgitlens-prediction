@@ -523,8 +523,6 @@ st.markdown("""
 left, right = st.columns([1, 1], gap="large")
 
 with left:
-    st.markdown('<span class="section-label">Benchmark</span>', unsafe_allow_html=True)
-    st.markdown('<div class="input-card">', unsafe_allow_html=True)
 
     area_type = st.radio(
         "Choose prediction level:",
@@ -549,8 +547,6 @@ with left:
     st.markdown('</div>', unsafe_allow_html=True)
 
 with right:
-    st.markdown('<span class="section-label">Your numbers</span>', unsafe_allow_html=True)
-    st.markdown('<div class="input-card">', unsafe_allow_html=True)
 
     income = st.number_input(
         "Estimated monthly income (RM)",
