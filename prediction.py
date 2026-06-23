@@ -437,7 +437,7 @@ df["state"] = df["state"].astype(str).str.upper()
 # CALCULATE STATE THRESHOLDS
 # =====================================================
 group_reference = (
-    df.groupby("income_group")["income"]
+    df.groupby("income_group")["income_mean"]
       .mean()
       .to_dict()
 )
