@@ -592,7 +592,7 @@ if predict_clicked:
         {
             "scope_encoded": [encoded_scope],
             "state_encoded": [encoded_state],
-            "income": [income_mean],
+            "income_mean": [income_mean],
             "expenditure": [expenditure]
         }
         )
