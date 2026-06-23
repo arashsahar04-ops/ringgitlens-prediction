@@ -431,10 +431,8 @@ footer, header {
 
 df = pd.read_csv("income_group_master_fyp_enriched.csv")
 
-df["state"] = df["state"].astype(str).str.upper()
-
 # =====================================================
-# CALCULATE STATE THRESHOLDS
+# CALCULATE GROUP THRESHOLDS
 # =====================================================
 group_reference = (
     df.groupby("income_group")["income_mean"]
@@ -451,13 +449,11 @@ ref_vals = [
 # CLEAN DATA
 # =====================================================
 
-df["state"] = df["state"].astype(str).str.upper()
-df["scope"] = df["scope"].astype(str).str.upper()
 df["income_group"] = df["income_group"].astype(str).str.upper()
 
 # Rename columns
 df = df.rename(columns={
-    "mean": "income",
+    "income_mean": "income_mean",
     "estimated_expenditure": "expenditure"
 })
 
@@ -465,12 +461,7 @@ df = df.rename(columns={
 # ENCODING
 # =====================================================
 
-state_encoder = LabelEncoder()
-scope_encoder = LabelEncoder()
 target_encoder = LabelEncoder()
-
-df["state_encoded"] = state_encoder.fit_transform(df["state"])
-df["scope_encoded"] = scope_encoder.fit_transform(df["scope"])
 
 df["target"] = target_encoder.fit_transform(
     df["income_group"]
@@ -481,8 +472,6 @@ df["target"] = target_encoder.fit_transform(
 
 X = df[
     [
-        "scope_encoded",
-        "state_encoded",
         "income_mean",
         "expenditure"
     ]
@@ -510,7 +499,7 @@ st.markdown("""
 <div class="hero-title">Income Group Prediction</div>
 <div class="hero-sub">
     Enter your monthly income and expenditure to see whether your household
-    sits in B40, M40, or T20 — benchmarked against national or state-level
+    sits in B40, M40, or T20 — the three main income groups in Malaysia. You'll also get a comparison
     income data — plus a clear read on your saving position.
 </div>
 <hr class="hero-divider" />
@@ -523,30 +512,6 @@ st.markdown("""
 left, right = st.columns([1, 1], gap="large")
 
 with left:
-
-    area_type = st.radio(
-        "Choose prediction level:",
-        ["Malaysia", "State"],
-        horizontal=True
-    )
-
-    if area_type == "Malaysia":
-        selected_scope = "MALAYSIA"
-        selected_state = "MALAYSIA"
-    else:
-        selected_scope = "STATE"
-        state_list = sorted(
-            df[df["state"] != "MALAYSIA"]["state"].unique()
-        )
-        selected_state = st.selectbox(
-            "Choose your state:",
-            state_list
-        )
-
-    st.markdown('<div style="height:6px"></div>', unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
-
-with right:
 
     income = st.number_input(
         "Estimated monthly income (RM)",
@@ -580,18 +545,10 @@ if predict_clicked:
 # RANDOM FOREST PREDICTION
 # ===============================================
 
-        encoded_scope = scope_encoder.transform(
-        [selected_scope]
-        )[0]
 
-        encoded_state = state_encoder.transform(
-        [selected_state]
-        )[0]
 
         user_data = pd.DataFrame(
         {
-            "scope_encoded": [encoded_scope],
-            "state_encoded": [encoded_state],
             "income_mean": [income],
             "expenditure": [expenditure]
         }
@@ -618,7 +575,6 @@ if predict_clicked:
         <div class="result-hero">
             <div class="result-eyebrow">Prediction Result</div>
             <div class="result-group" style="color:{group_color};">{predicted_group}</div>
-            <div class="result-area">{selected_state} · Closest match by mean income</div>
         </div>
         """, unsafe_allow_html=True)
 
