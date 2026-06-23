@@ -473,22 +473,22 @@ state_encoder = LabelEncoder()
 scope_encoder = LabelEncoder()
 target_encoder = LabelEncoder()
 
-df["state_encoded"] = state_encoder.fit_transform(df["state"])
-df["scope_encoded"] = scope_encoder.fit_transform(df["scope"])
-df["income_group_encoded"] = target_encoder.fit_transform(df["income_group"])
+df["state"] = state_encoder.fit_transform(df["state"])
+df["scope"] = scope_encoder.fit_transform(df["scope"])
+df["income"] = target_encoder.fit_transform(df["income_group"])
 
 # =====================================================
 # FEATURES & TARGET
 # =====================================================
 
 X = df[[
-    "scope_encoded",
-    "state_encoded",
+    "scope",
+    "state",
     "income",
     "expenditure"
 ]]
 
-y = df["income_group_encoded"]
+y = df["income"]
 
 # =====================================================
 # TRAIN MODEL
