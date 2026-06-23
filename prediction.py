@@ -331,7 +331,7 @@ div[aria-selected="true"] * {
 
 .stat-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 14px;
     margin-top: 18px;
 }
@@ -432,24 +432,20 @@ footer, header {
 df = pd.read_csv("income_group_master_fyp_enriched.csv")
 
 df["state"] = df["state"].astype(str).str.upper()
-df["income_class"] = df["income_class"].astype(str).str.upper()
 
 # =====================================================
 # CALCULATE STATE THRESHOLDS
 # =====================================================
-
-state_income_reference = (
-    df.groupby(["state", "income_class"])["income_mean"]
-      .mean()
-      .reset_index()
-)
-
-# National reference
-malaysia_reference = (
-    df.groupby("income_class")["income_mean"]
+group_reference = (
+    df.groupby("income_group")["income"]
       .mean()
       .to_dict()
 )
+ref_vals = [
+    group_reference.get("B40", 0),
+    group_reference.get("M40", 0),
+    group_reference.get("T20", 0)
+]
 
 # =====================================================
 # CLEAN DATA
@@ -473,22 +469,26 @@ state_encoder = LabelEncoder()
 scope_encoder = LabelEncoder()
 target_encoder = LabelEncoder()
 
-df["state"] = state_encoder.fit_transform(df["state"])
-df["scope"] = scope_encoder.fit_transform(df["scope"])
-df["income"] = target_encoder.fit_transform(df["income_group"])
+df["state_encoded"] = state_encoder.fit_transform(df["state"])
+df["scope_encoded"] = scope_encoder.fit_transform(df["scope"])
 
+df["target"] = target_encoder.fit_transform(
+    df["income_group"]
+)
 # =====================================================
 # FEATURES & TARGET
 # =====================================================
 
-X = df[[
-    "scope",
-    "state",
-    "income",
-    "expenditure"
-]]
+X = df[
+    [
+        "scope_encoded",
+        "state_encoded",
+        "income",
+        "expenditure"
+    ]
+]
 
-y = df["income"]
+y = df["target"]
 
 # =====================================================
 # TRAIN MODEL
@@ -523,7 +523,7 @@ st.markdown("""
 left, right = st.columns([1, 1], gap="large")
 
 with left:
-    st.markdown('<span class="section-label">Step 1 — Benchmark</span>', unsafe_allow_html=True)
+    st.markdown('<span class="section-label">Benchmark</span>', unsafe_allow_html=True)
     st.markdown('<div class="input-card">', unsafe_allow_html=True)
 
     area_type = st.radio(
@@ -549,25 +549,30 @@ with left:
     st.markdown('</div>', unsafe_allow_html=True)
 
 with right:
-    st.markdown('<span class="section-label">Step 2 — Your numbers</span>', unsafe_allow_html=True)
+    st.markdown('<span class="section-label">Your numbers</span>', unsafe_allow_html=True)
     st.markdown('<div class="input-card">', unsafe_allow_html=True)
 
     income = st.number_input(
         "Estimated monthly income (RM)",
-        min_value=0.0,
-        step=100.0
+        min_value=0,
+        step=100,
+        format="%d",
     )
 
     expenditure = st.number_input(
         "Estimated monthly household expenditure (RM)",
-        min_value=0.0,
-        step=100.0
+        min_value=0,
+        step=100,
+        format="%d",
     )
 
     st.markdown('</div>', unsafe_allow_html=True)
 
 st.markdown('<div style="height:6px"></div>', unsafe_allow_html=True)
-predict_clicked = st.button("Predict Income Group")
+predict_clicked = st.button(
+    "Predict Income Group",
+    use_container_width=True
+)
 
 # =====================================================
 # PREDICTION
@@ -575,40 +580,39 @@ predict_clicked = st.button("Predict Income Group")
 
 if predict_clicked:
 
-    # ===============================================
-    # GET REFERENCE INCOME VALUES
-    # ===============================================
+# ===============================================
+# RANDOM FOREST PREDICTION
+# ===============================================
 
-    if selected_scope == "MALAYSIA":
-        reference = malaysia_reference
-    else:
-        state_data = state_income_reference[
-            state_income_reference["state"] == selected_state
-        ]
-        reference = {
-            row["income_class"]: row["income_mean"]
-            for _, row in state_data.iterrows()
+        encoded_scope = scope_encoder.transform(
+        [selected_scope]
+        )[0]
+
+        encoded_state = state_encoder.transform(
+        [selected_state]
+        )[0]
+
+        user_data = pd.DataFrame(
+        {
+            "scope_encoded": [encoded_scope],
+            "state_encoded": [encoded_state],
+            "income": [income],
+            "expenditure": [expenditure]
         }
-
-    # ===============================================
-    # FIND CLOSEST INCOME GROUP
-    # ===============================================
-
-    differences = {}
-
-    for group in ["B40", "M40", "T20"]:
-        if group in reference:
-            differences[group] = abs(income - reference[group])
-
-    if not differences:
-        st.error(
-            "No reference data is available for this selection. "
-            "Please choose a different state."
         )
-    else:
-        predicted_group = min(differences, key=differences.get)
+
+        prediction = model.predict(user_data)
+
+        predicted_group = target_encoder.inverse_transform(
+        prediction
+        )[0]
+
         balance = income - expenditure
-        group_color = CLASS_COLORS.get(predicted_group, "#14524A")
+
+        group_color = CLASS_COLORS.get(
+        predicted_group,
+        "#14524A"
+        )
 
         # ===============================================
         # RESULT HERO
@@ -635,10 +639,6 @@ if predict_clicked:
                 <div class="stat-label">Monthly Expenditure</div>
                 <div class="stat-value">RM {expenditure:,.2f}</div>
             </div>
-            <div class="stat-card">
-                <div class="stat-label">Remaining Balance</div>
-                <div class="stat-value {balance_class}">{balance_sign}RM {abs(balance):,.2f}</div>
-            </div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -651,7 +651,7 @@ if predict_clicked:
         st.markdown('<div class="chart-card">', unsafe_allow_html=True)
 
         groups_order = ["B40", "M40", "T20"]
-        ref_vals = [reference.get(g) for g in groups_order]
+        ref_vals = [group_reference.get(g) for g in groups_order]
 
         fig = go.Figure()
 
