@@ -501,7 +501,7 @@ st.markdown("""
 <div class="hero-sub">
     Enter your monthly income and expenditure to see whether your household
     sits in B40, M40, or T20 — the three main income groups in Malaysia. You'll also get a comparison
-    income data — plus a clear read on your saving position.
+    for income data plus a clear read on your saving position.
 </div>
 <hr class="hero-divider" />
 """, unsafe_allow_html=True)
