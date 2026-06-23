@@ -1,4 +1,4 @@
-scope,state,record_date,income_group,income_mean,income_median,estimated_expenditure,race,region,age_group,household_size,occupation_group,urban_rural,income_class
+scope,state,record_date,income_group,income_mean,income_median,expenditure,race,region,age_group,household_size,occupation_group,urban_rural,income_class
 MALAYSIA,MALAYSIA,2019-01-01,B40,3475.9984375,3478.134375,2266.54,Malay,Central,18-29,1-2,Manager,Rural,B40
 MALAYSIA,MALAYSIA,2019-02-01,B40,3481.708376736111,3483.8253038194443,1986.39,Chinese,Central,30-39,3-4,Professional,Urban,M40
 MALAYSIA,MALAYSIA,2019-03-01,B40,3487.418315972222,3489.516232638889,2016.73,Indian,Central,40-49,5-6,Technician,Urban,T20
