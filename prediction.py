@@ -481,9 +481,9 @@ df["target"] = target_encoder.fit_transform(
 
 X = df[
     [
-        "scope",
-        "state",
-        "income",
+        "scope_encoded",
+        "state_encoded",
+        "income_mean",
         "expenditure"
     ]
 ]
