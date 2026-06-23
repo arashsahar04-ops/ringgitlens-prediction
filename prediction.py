@@ -422,7 +422,9 @@ footer, header {
 [data-testid="stHorizontalBlock"] {
     gap: 24px;
 }
-
+.js-plotly-plot .legend text {
+    fill: #0F1B17 !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
